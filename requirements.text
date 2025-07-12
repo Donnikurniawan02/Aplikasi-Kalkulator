@@ -1,3 +1,5 @@
+pip install sympy matplotlib numpy
+
 streamlit
 sympy
 matplotlib
