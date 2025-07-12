@@ -1,58 +1,38 @@
+import streamlit as st
 import sympy as sp
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Variabel simbolik
-x = sp.symbols('x')
+x = sp.Symbol('x')
 
-# Fungsi input dari pengguna
-fungsi_input = input("Masukkan fungsi aljabar dalam x: ")
+st.title("🧮 Kalkulator Integral & Turunan (KalkulusX)")
+fungsi_input = st.text_input("Masukkan fungsi aljabar (misal: x*2 + 3*x):", "x*2 + 3*x")
 fungsi = sp.sympify(fungsi_input)
 
-# Menu pilihan
-print("\nPilih operasi:")
-print("1. Turunan")
-print("2. Integral")
-pilihan = input("Masukkan pilihan (1/2): ")
+operasi = st.radio("Pilih Operasi:", ["Turunan", "Integral"])
 
-# Operasi berdasarkan pilihan
-if pilihan == '1':
-    turunan = sp.diff(fungsi, x)
-    print(f"\nHasil turunan simbolik dari {fungsi_input}:")
-    print("Turunan:", turunan)
-    
-    # Evaluasi turunan secara numerik
-    f_turunan_lambdified = sp.lambdify(x, turunan, modules=['numpy'])
-    x_vals = np.linspace(-10, 10, 400)
-    y_vals = f_turunan_lambdified(x_vals)
-    
-    # Gambar grafik
-    plt.plot(x_vals, y_vals, label=f"Turunan dari {fungsi_input}")
-    plt.title("Grafik Turunan")
-    plt.xlabel("x")
-    plt.ylabel("f'(x)")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-elif pilihan == '2':
-    integral = sp.integrate(fungsi, x)
-    print(f"\nHasil integral simbolik dari {fungsi_input}:")
-    print("Integral:", integral, "+ C")
-
-    # Evaluasi integral secara numerik (jika fungsi bisa diintegrasi)
-    f_integral_lambdified = sp.lambdify(x, integral, modules=['numpy'])
-    x_vals = np.linspace(-10, 10, 400)
-    y_vals = f_integral_lambdified(x_vals)
-
-    # Gambar grafik
-    plt.plot(x_vals, y_vals, label=f"Integral dari {fungsi_input}")
-    plt.title("Grafik Integral")
-    plt.xlabel("x")
-    plt.ylabel("∫f(x) dx")
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
+# Hasil simbolik
+if operasi == "Turunan":
+    hasil = sp.diff(fungsi, x)
+    st.latex(f"f'(x) = {sp.latex(hasil)}")
 else:
-    print("Pilihan tidak valid. Silakan pilih 1 atau 2.")
+    hasil = sp.integrate(fungsi, x)
+    st.latex(f"\\int f(x) dx = {sp.latex(hasil)} + C")
+
+# Evaluasi numerik
+titik = st.number_input("Evaluasi pada x =", value=1.0)
+evaluasi = hasil.subs(x, titik)
+st.write(f"Hasil evaluasi pada x = {titik} adalah {evaluasi}")
+
+# Grafik
+st.subheader("Grafik Fungsi dan Hasil")
+x_vals = np.linspace(-10, 10, 400)
+f_lambd = sp.lambdify(x, fungsi, modules=["numpy"])
+h_lambd = sp.lambdify(x, hasil, modules=["numpy"])
+
+plt.figure(figsize=(10,5))
+plt.plot(x_vals, f_lambd(x_vals), label='Fungsi Asli f(x)', color='blue')
+plt.plot(x_vals, h_lambd(x_vals), label='Hasil Operasi', color='red')
+plt.legend()
+plt.grid(True)
+st.pyplot(plt)
