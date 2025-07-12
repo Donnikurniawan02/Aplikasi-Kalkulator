@@ -1,62 +1,58 @@
-import tkinter as tk
-from tkinter import messagebox
-from sympy import symbols, diff, integrate, lambdify, sympify
+import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Inisialisasi variabel simbolik
-x = symbols('x')
+# Variabel simbolik
+x = sp.symbols('x')
 
-def hitung():
-    fungsi_input = entry.get()
-    try:
-        fungsi = sympify(fungsi_input)
+# Fungsi input dari pengguna
+fungsi_input = input("Masukkan fungsi aljabar dalam x: ")
+fungsi = sp.sympify(fungsi_input)
 
-        turunan = diff(fungsi, x)
-        integral = integrate(fungsi, x)
+# Menu pilihan
+print("\nPilih operasi:")
+print("1. Turunan")
+print("2. Integral")
+pilihan = input("Masukkan pilihan (1/2): ")
 
-        result_text = f"Fungsi: {fungsi}\n"
-        result_text += f"Turunan: {turunan}\n"
-        result_text += f"Integral: {integral}\n"
-
-        result_label.config(text=result_text)
-        plot_fungsi(fungsi, turunan)
-
-    except Exception as e:
-        messagebox.showerror("Error", f"Terjadi kesalahan: {e}")
-
-def plot_fungsi(f, turunan_f):
-    fx = lambdify(x, f, 'numpy')
-    fdx = lambdify(x, turunan_f, 'numpy')
-
-    X = np.linspace(-10, 10, 400)
-    Y = fx(X)
-    Y_diff = fdx(X)
-
-    plt.figure(figsize=(8, 4))
-    plt.plot(X, Y, label='Fungsi Asli', color='blue')
-    plt.plot(X, Y_diff, label='Turunan', color='red', linestyle='--')
-    plt.title("Grafik Fungsi dan Turunannya")
+# Operasi berdasarkan pilihan
+if pilihan == '1':
+    turunan = sp.diff(fungsi, x)
+    print(f"\nHasil turunan simbolik dari {fungsi_input}:")
+    print("Turunan:", turunan)
+    
+    # Evaluasi turunan secara numerik
+    f_turunan_lambdified = sp.lambdify(x, turunan, modules=['numpy'])
+    x_vals = np.linspace(-10, 10, 400)
+    y_vals = f_turunan_lambdified(x_vals)
+    
+    # Gambar grafik
+    plt.plot(x_vals, y_vals, label=f"Turunan dari {fungsi_input}")
+    plt.title("Grafik Turunan")
     plt.xlabel("x")
-    plt.ylabel("y")
-    plt.axhline(0, color='black', linewidth=0.5)
-    plt.axvline(0, color='black', linewidth=0.5)
+    plt.ylabel("f'(x)")
     plt.grid(True)
     plt.legend()
-    plt.tight_layout()
     plt.show()
 
-# GUI
-app = tk.Tk()
-app.title("Kalkulator Integral dan Turunan")
+elif pilihan == '2':
+    integral = sp.integrate(fungsi, x)
+    print(f"\nHasil integral simbolik dari {fungsi_input}:")
+    print("Integral:", integral, "+ C")
 
-tk.Label(app, text="Masukkan Fungsi (gunakan x):").pack()
-entry = tk.Entry(app, width=40)
-entry.pack()
+    # Evaluasi integral secara numerik (jika fungsi bisa diintegrasi)
+    f_integral_lambdified = sp.lambdify(x, integral, modules=['numpy'])
+    x_vals = np.linspace(-10, 10, 400)
+    y_vals = f_integral_lambdified(x_vals)
 
-tk.Button(app, text="Hitung", command=hitung).pack(pady=10)
+    # Gambar grafik
+    plt.plot(x_vals, y_vals, label=f"Integral dari {fungsi_input}")
+    plt.title("Grafik Integral")
+    plt.xlabel("x")
+    plt.ylabel("∫f(x) dx")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
-result_label = tk.Label(app, text="", justify="left")
-result_label.pack()
-
-app.mainloop()
+else:
+    print("Pilihan tidak valid. Silakan pilih 1 atau 2.")
