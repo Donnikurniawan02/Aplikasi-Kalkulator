@@ -1,6 +1,7 @@
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
+import sympy as sp
 
 # Variabel simbolik
 x = sp.symbols('x')
